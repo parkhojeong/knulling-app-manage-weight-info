@@ -54,7 +54,7 @@ class MainActivity : AppCompatActivity() {
             val count = countText.toInt()
             val set = setText.toInt()
             val restTime = if(restTimeText == "") 0 else restTimeText.toInt()
-            currentDateRef.push().setValue(ListView_Item(0,count,set,typeText, restTime ))
+            currentDateRef.push().setValue(mapOf("count" to count, "set" to set, "restTime" to restTime, "type" to typeText))
         }
     }
 
@@ -66,12 +66,13 @@ class MainActivity : AppCompatActivity() {
             val items = mutableListOf<ListView_Item>()
 
             it.child("bob").child(getCurrentDateString()).children.forEach { data ->
+                val id: String = data.key as String
                 val set: Number = data.child("set").value?.toString()?.toInt() ?: 0
                 val count: Number = data.child("count").value?.toString()?.toInt() ?: 0
                 val type: String = data.child("type").value?.toString() ?: ""
                 val restTime: Number = data.child("restTime").value?.toString()?.toInt() ?: 0
 
-                items.add(ListView_Item(0, count, set, type, restTime))
+                items.add(ListView_Item(id, count, set, type, restTime))
             }
 
             mAdapter = ListView_Adapter(this, items)
@@ -89,12 +90,13 @@ class MainActivity : AppCompatActivity() {
                 val items = mutableListOf<ListView_Item>()
 
                 dataSnapshot.child(getCurrentDateString()).children.forEach { data ->
+                    val id: String = data.key as String
                     val set: Number = data.child("set").value?.toString()?.toInt() ?: 0
                     val count: Number = data.child("count").value?.toString()?.toInt() ?: 0
                     val type: String = data.child("type").value?.toString() ?: ""
                     val restTime: Number = data.child("restTime").value?.toString()?.toInt() ?: 0
 
-                    items.add(ListView_Item(0, count, set, type, restTime))
+                    items.add(ListView_Item(id, count, set, type, restTime))
                 }
 
                 mAdapter = ListView_Adapter(applicationContext, items)
@@ -158,7 +160,7 @@ class ListView_Adapter(context: Context, items: List<ListView_Item>?) :
 }
 
 class ListView_Item(
-    val index: Number,
+    val id: String,
     val count: Number,
     val set: Number,
     val type: String,
