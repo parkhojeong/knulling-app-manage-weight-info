@@ -75,7 +75,7 @@ class MainActivity : AppCompatActivity() {
                 items.add(ListView_Item(id, count, set, type, restTime))
             }
 
-            mAdapter = ListView_Adapter(this, items)
+            mAdapter = ListView_Adapter(this, items, database)
             listView.setAdapter(mAdapter)
         }.addOnFailureListener {
             Log.d(TAG, "[OnFailureListener] Error getting data $it")
@@ -99,7 +99,7 @@ class MainActivity : AppCompatActivity() {
                     items.add(ListView_Item(id, count, set, type, restTime))
                 }
 
-                mAdapter = ListView_Adapter(applicationContext, items)
+                mAdapter = ListView_Adapter(applicationContext, items, database)
                 listView.setAdapter(mAdapter)
             }
 
@@ -109,19 +109,19 @@ class MainActivity : AppCompatActivity() {
         })
     }
 
-    fun getCurrentDateString(): String {
-        return SimpleDateFormat("YYYY-MM-d").format(Date()).toString()
-    }
+
 }
 
-class ListView_Adapter(context: Context, items: List<ListView_Item>?) :
+class ListView_Adapter(context: Context, items: List<ListView_Item>?, databaseReference: DatabaseReference) :
     BaseAdapter() {
     var items: List<ListView_Item>? = null
     var context: Context
+    var database: DatabaseReference
 
     init {
         this.items = items
         this.context = context
+        this.database = databaseReference
     }
 
     override fun getCount(): Int {
@@ -155,6 +155,10 @@ class ListView_Adapter(context: Context, items: List<ListView_Item>?) :
         set.text = item.set.toString()
         restTime.text = item.restTime.toString()
 
+        view.findViewById<Button>(R.id.listitem_deleteButton).setOnClickListener{
+            database.child("weightInfo").child("bob").child(getCurrentDateString()).child(item.id).removeValue()
+        }
+
         return view
     }
 }
@@ -166,4 +170,8 @@ class ListView_Item(
     val type: String,
     val restTime: Number?
 ) {
+}
+
+fun getCurrentDateString(): String {
+    return SimpleDateFormat("YYYY-MM-d").format(Date()).toString()
 }
