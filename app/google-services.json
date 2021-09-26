@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "991071580523",
+    "project_id": "knulling-app",
+    "storage_bucket": "knulling-app.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:991071580523:android:1bcd8de489e43fe5015c2e",
+        "android_client_info": {
+          "package_name": "com.example.recordweightinfo"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "991071580523-6euq9b6k1b8q88nv1dp1tr9sq3h7l19v.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCE0gWR_jWPtJ0BuSGed6yR64UV0e32Xdg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "991071580523-6euq9b6k1b8q88nv1dp1tr9sq3h7l19v.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
