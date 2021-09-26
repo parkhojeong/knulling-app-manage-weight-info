@@ -10,15 +10,12 @@ import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
 import android.content.Context
 
-import android.widget.TextView
-
 import android.view.LayoutInflater
 import android.view.View
 
 import android.view.ViewGroup
+import android.widget.*
 
-import android.widget.BaseAdapter
-import android.widget.ListView
 import com.google.firebase.database.DatabaseReference
 import java.text.SimpleDateFormat
 import java.util.*
@@ -35,12 +32,37 @@ class MainActivity : AppCompatActivity() {
 
         database = Firebase.database.reference
         loadTodayWeightInfo()
+        addWeitghInfo()
+        asyncTodayWeightInfo()
+    }
+
+    fun addWeitghInfo(){
+        val weightAddButton: Button = findViewById(R.id.weightAddButton)
+        weightAddButton.setOnClickListener{
+            val typeText = findViewById<EditText>(R.id.weightTypeAddText).text.toString()
+            val countText = findViewById<EditText>(R.id.weightCountAddText).text.toString()
+            val setText = findViewById<EditText>(R.id.weightSetAddText).text.toString()
+            val restTimeText = findViewById<EditText>(R.id.weightRestTimeAddText).text.toString()
+
+            if(typeText.isEmpty() || countText.isEmpty() || setText.isEmpty()){
+                Toast.makeText(this.applicationContext, "빈 칸을 입력해주세요", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            val currentDateRef = database.child("weightInfo").child("bob").child(getCurrentDateString())
+
+            val count = countText.toInt()
+            val set = setText.toInt()
+            val restTime = if(restTimeText == "") 0 else restTimeText.toInt()
+            currentDateRef.push().setValue(ListView_Item(0,count,set,typeText, restTime ))
+        }
     }
 
     fun loadTodayWeightInfo() {
         val listView: ListView = findViewById(R.id.listview_list)
 
         database.child("weightInfo").get().addOnSuccessListener {
+            Log.d(TAG, "[OnSuccessListener]")
             val items = mutableListOf<ListView_Item>()
 
             it.child("bob").child(getCurrentDateString()).children.forEach { data ->
@@ -55,7 +77,7 @@ class MainActivity : AppCompatActivity() {
             mAdapter = ListView_Adapter(this, items)
             listView.setAdapter(mAdapter)
         }.addOnFailureListener {
-            Log.d(TAG, "Error getting data $it")
+            Log.d(TAG, "[OnFailureListener] Error getting data $it")
         }
     }
 
