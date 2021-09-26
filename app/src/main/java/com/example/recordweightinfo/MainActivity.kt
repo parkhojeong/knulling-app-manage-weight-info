@@ -22,7 +22,6 @@ import android.widget.ListView
 import com.google.firebase.database.DatabaseReference
 import java.text.SimpleDateFormat
 import java.util.*
-import kotlin.collections.ArrayList
 
 
 class MainActivity : AppCompatActivity() {
@@ -35,44 +34,35 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         database = Firebase.database.reference
-        database.child("message").setValue("hi~")
+        loadTodayWeightInfo()
+    }
 
+    fun loadTodayWeightInfo() {
         val listView: ListView = findViewById(R.id.listview_list)
 
-
         database.child("weightInfo").get().addOnSuccessListener {
-            Log.d(TAG, "Got value ${it.value}")
+            val items = mutableListOf<ListView_Item>()
 
-            var items = mutableListOf<ListView_Item>()
+            it.child("bob").child(getCurrentDateString()).children.forEach { data ->
+                val set: Number = data.child("set").value?.toString()?.toInt() ?: 0
+                val count: Number = data.child("count").value?.toString()?.toInt() ?: 0
+                val type: String = data.child("type").value?.toString() ?: ""
+                val restTime: Number = data.child("restTime").value?.toString()?.toInt() ?: 0
 
-            val todayData = it.child("bob").child(getCurrentDateString())
-            todayData.children.forEach({
-                var set: Number = it.child("set").value?.toString()?.toInt() ?: 0
-                var count: Number = it.child("count").value?.toString()?.toInt() ?: 0
-                var type: String = it.child("type").value?.toString() ?: ""
-                var restTime: Number? = it.child("restTime").value?.toString()?.toInt() ?: 0
-
-                Log.d(TAG, "$set, $count, $type $restTime")
                 items.add(ListView_Item(0, count, set, type, restTime))
-            })
+            }
 
             mAdapter = ListView_Adapter(this, items)
             listView.setAdapter(mAdapter)
         }.addOnFailureListener {
-            Log.d(TAG, "Error getting data ${it}")
+            Log.d(TAG, "Error getting data $it")
         }
+    }
 
-
-        database.child("weightInfo").addValueEventListener(object : ValueEventListener {
+    fun asyncTodayWeightInfo() {
+        database.child("weightInfo").child("bob").addValueEventListener(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
-
                 Log.d(TAG, "onDataChange")
-                dataSnapshot.children.forEach({ date ->
-                    Log.d(
-                        TAG,
-                        "${date.key} ${date.value.toString()} ~~~"
-                    )
-                })
             }
 
             override fun onCancelled(error: DatabaseError) {
@@ -82,8 +72,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun getCurrentDateString(): String {
-        return "2021-09-25"
-//        return SimpleDateFormat("YYYY-MM-d").format(Date()).toString()
+        return SimpleDateFormat("YYYY-MM-d").format(Date()).toString()
     }
 }
 
