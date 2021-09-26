@@ -85,6 +85,20 @@ class MainActivity : AppCompatActivity() {
         database.child("weightInfo").child("bob").addValueEventListener(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 Log.d(TAG, "onDataChange")
+                val listView: ListView = findViewById(R.id.listview_list)
+                val items = mutableListOf<ListView_Item>()
+
+                dataSnapshot.child(getCurrentDateString()).children.forEach { data ->
+                    val set: Number = data.child("set").value?.toString()?.toInt() ?: 0
+                    val count: Number = data.child("count").value?.toString()?.toInt() ?: 0
+                    val type: String = data.child("type").value?.toString() ?: ""
+                    val restTime: Number = data.child("restTime").value?.toString()?.toInt() ?: 0
+
+                    items.add(ListView_Item(0, count, set, type, restTime))
+                }
+
+                mAdapter = ListView_Adapter(applicationContext, items)
+                listView.setAdapter(mAdapter)
             }
 
             override fun onCancelled(error: DatabaseError) {
