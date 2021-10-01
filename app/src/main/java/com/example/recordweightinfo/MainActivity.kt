@@ -19,6 +19,8 @@ import android.widget.*
 import com.google.firebase.database.DatabaseReference
 import java.text.SimpleDateFormat
 import java.util.*
+import android.widget.TextView
+import android.widget.Toast
 
 
 class MainActivity : AppCompatActivity() {
@@ -36,25 +38,33 @@ class MainActivity : AppCompatActivity() {
         asyncTodayWeightInfo()
     }
 
-    fun addWeitghInfo(){
+    fun addWeitghInfo() {
         val weightAddButton: Button = findViewById(R.id.weightAddButton)
-        weightAddButton.setOnClickListener{
+        weightAddButton.setOnClickListener {
             val typeText = findViewById<EditText>(R.id.weightTypeAddText).text.toString()
             val countText = findViewById<EditText>(R.id.weightCountAddText).text.toString()
             val setText = findViewById<EditText>(R.id.weightSetAddText).text.toString()
             val restTimeText = findViewById<EditText>(R.id.weightRestTimeAddText).text.toString()
 
-            if(typeText.isEmpty() || countText.isEmpty() || setText.isEmpty()){
+            if (typeText.isEmpty() || countText.isEmpty() || setText.isEmpty()) {
                 Toast.makeText(this.applicationContext, "빈 칸을 입력해주세요", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
-            val currentDateRef = database.child("weightInfo").child("bob").child(getCurrentDateString())
+            val currentDateRef =
+                database.child("weightInfo").child("bob").child(getCurrentDateString())
 
             val count = countText.toInt()
             val set = setText.toInt()
-            val restTime = if(restTimeText == "") 0 else restTimeText.toInt()
-            currentDateRef.push().setValue(mapOf("count" to count, "set" to set, "restTime" to restTime, "type" to typeText))
+            val restTime = if (restTimeText == "") 0 else restTimeText.toInt()
+            currentDateRef.push().setValue(
+                mapOf(
+                    "count" to count,
+                    "set" to set,
+                    "restTime" to restTime,
+                    "type" to typeText
+                )
+            )
         }
     }
 
@@ -75,7 +85,7 @@ class MainActivity : AppCompatActivity() {
                 items.add(ListView_Item(id, count, set, type, restTime))
             }
 
-            mAdapter = ListView_Adapter(this, items, database){ id: String ->
+            mAdapter = ListView_Adapter(this, items, database) { id: String ->
                 database.child(
                     "weightInfo"
                 ).child("bob").child(getCurrentDateString()).child(id).removeValue()
@@ -87,41 +97,48 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun asyncTodayWeightInfo() {
-        database.child("weightInfo").child("bob").addValueEventListener(object : ValueEventListener {
-            override fun onDataChange(dataSnapshot: DataSnapshot) {
-                Log.d(TAG, "onDataChange")
-                val listView: ListView = findViewById(R.id.listview_list)
-                val items = mutableListOf<ListView_Item>()
+        database.child("weightInfo").child("bob")
+            .addValueEventListener(object : ValueEventListener {
+                override fun onDataChange(dataSnapshot: DataSnapshot) {
+                    Log.d(TAG, "onDataChange")
+                    val listView: ListView = findViewById(R.id.listview_list)
+                    val items = mutableListOf<ListView_Item>()
 
-                dataSnapshot.child(getCurrentDateString()).children.forEach { data ->
-                    val id: String = data.key as String
-                    val set: Number = data.child("set").value?.toString()?.toInt() ?: 0
-                    val count: Number = data.child("count").value?.toString()?.toInt() ?: 0
-                    val type: String = data.child("type").value?.toString() ?: ""
-                    val restTime: Number = data.child("restTime").value?.toString()?.toInt() ?: 0
+                    dataSnapshot.child(getCurrentDateString()).children.forEach { data ->
+                        val id: String = data.key as String
+                        val set: Number = data.child("set").value?.toString()?.toInt() ?: 0
+                        val count: Number = data.child("count").value?.toString()?.toInt() ?: 0
+                        val type: String = data.child("type").value?.toString() ?: ""
+                        val restTime: Number =
+                            data.child("restTime").value?.toString()?.toInt() ?: 0
 
-                    items.add(ListView_Item(id, count, set, type, restTime))
+                        items.add(ListView_Item(id, count, set, type, restTime))
+                    }
+
+                    mAdapter = ListView_Adapter(applicationContext, items, database) { id: String ->
+                        database.child(
+                            "weightInfo"
+                        ).child("bob").child(getCurrentDateString()).child(id).removeValue()
+                    }
+
+                    listView.setAdapter(mAdapter)
                 }
 
-                mAdapter = ListView_Adapter(applicationContext, items, database) { id: String ->
-                    database.child(
-                        "weightInfo"
-                    ).child("bob").child(getCurrentDateString()).child(id).removeValue()
+                override fun onCancelled(error: DatabaseError) {
+                    Log.d(TAG, "Failed to read value.", error.toException())
                 }
-
-                listView.setAdapter(mAdapter)
-            }
-
-            override fun onCancelled(error: DatabaseError) {
-                Log.d(TAG, "Failed to read value.", error.toException())
-            }
-        })
+            })
     }
 
 }
 
 
-class ListView_Adapter(context: Context, items: List<ListView_Item>?, databaseReference: DatabaseReference, deleteItem: (id :String) -> Unit) :
+class ListView_Adapter(
+    context: Context,
+    items: List<ListView_Item>?,
+    databaseReference: DatabaseReference,
+    deleteItem: (id: String) -> Unit
+) :
     BaseAdapter() {
     var items: List<ListView_Item>? = null
     var context: Context
@@ -166,7 +183,7 @@ class ListView_Adapter(context: Context, items: List<ListView_Item>?, databaseRe
         set.text = item.set.toString()
         restTime.text = item.restTime.toString()
 
-        view.findViewById<Button>(R.id.listitem_deleteButton).setOnClickListener{
+        view.findViewById<Button>(R.id.listitem_deleteButton).setOnClickListener {
             deleteItem(item.id)
         }
 
@@ -184,5 +201,5 @@ class ListView_Item(
 }
 
 fun getCurrentDateString(): String {
-    return SimpleDateFormat("YYYY-MM-d").format(Date()).toString()
+    return SimpleDateFormat("y-MM-d").format(Date()).toString()
 }
