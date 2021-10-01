@@ -50,8 +50,15 @@
         android:textSize="20sp" />
 
     <Button
+        android:id="@+id/listitem_editButton"
+        android:layout_width="20dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:text="E" />
+
+    <Button
         android:id="@+id/listitem_deleteButton"
-        android:layout_width="40dp"
+        android:layout_width="20dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
         android:text="X" />

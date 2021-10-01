@@ -21,6 +21,7 @@ import java.text.SimpleDateFormat
 import java.util.*
 import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 
 
 class MainActivity : AppCompatActivity() {
@@ -185,6 +186,53 @@ class ListView_Adapter(
 
         view.findViewById<Button>(R.id.listitem_deleteButton).setOnClickListener {
             deleteItem(item.id)
+        }
+
+        val alertDialogBuilder = AlertDialog.Builder(context)
+        val dialogView = layoutInflater.inflate(R.layout.dialog, null)
+
+        view.findViewById<Button>(R.id.listitem_editButton).setOnClickListener {
+            val dialogWeightInfoTypeText =
+                dialogView.findViewById<EditText>(R.id.dialogWeightInfoTypeText)
+            val dialogWeightInfoCountText =
+                dialogView.findViewById<EditText>(R.id.dialogWeightInfoCountText)
+            val dialogWeightInfoSetText =
+                dialogView.findViewById<EditText>(R.id.dialogWeightInfoSetText)
+            val dialogWeightInfoRestTimeText =
+                dialogView.findViewById<EditText>(R.id.dialogWeightInfoRestTimeText)
+
+            dialogWeightInfoTypeText.setText(type.text)
+            dialogWeightInfoCountText.setText(count.text)
+            dialogWeightInfoSetText.setText(set.text)
+            dialogWeightInfoRestTimeText.setText(restTime.text)
+
+
+            alertDialogBuilder.setView(dialogView)
+                .setPositiveButton("확인") { dialogInterface, i ->
+                    val type = dialogWeightInfoTypeText.text.toString()
+                    val set = dialogWeightInfoSetText.text.toString().toInt()
+                    val count = dialogWeightInfoCountText.text.toString().toInt()
+                    val restTime = dialogWeightInfoRestTimeText.text.toString().toInt()
+                    val listViewItem = ListView_Item(item.id, count, set, type, restTime)
+
+
+                    database
+                        .child(
+                            "weightInfo"
+                        ).child("bob")
+                        .child(getCurrentDateString())
+                        .child(item.id)
+                        .setValue(listViewItem)
+                        .addOnSuccessListener {
+                            Toast.makeText(context, "완료", Toast.LENGTH_SHORT).show()
+                        }
+
+
+                }
+                .setNegativeButton("취소") { dialogInterface, i ->
+                    Toast.makeText(context, "취소", Toast.LENGTH_SHORT).show()
+                }
+                .show()
         }
 
         return view
