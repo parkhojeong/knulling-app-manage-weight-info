@@ -21,7 +21,7 @@ import java.text.SimpleDateFormat
 import java.util.*
 import android.widget.TextView
 import android.widget.Toast
-import androidx.appcompat.app.AlertDialog
+import android.app.AlertDialog
 
 
 class MainActivity : AppCompatActivity() {
@@ -131,113 +131,113 @@ class MainActivity : AppCompatActivity() {
             })
     }
 
-}
+    inner class ListView_Adapter(
+        context: Context,
+        items: List<ListView_Item>?,
+        databaseReference: DatabaseReference,
+        deleteItem: (id: String) -> Unit
+    ) :
+        BaseAdapter() {
+        var items: List<ListView_Item>? = null
+        var context: Context
+        var database: DatabaseReference
+        var deleteItem: (id: String) -> Unit
 
-
-class ListView_Adapter(
-    context: Context,
-    items: List<ListView_Item>?,
-    databaseReference: DatabaseReference,
-    deleteItem: (id: String) -> Unit
-) :
-    BaseAdapter() {
-    var items: List<ListView_Item>? = null
-    var context: Context
-    var database: DatabaseReference
-    var deleteItem: (id: String) -> Unit
-
-    init {
-        this.items = items
-        this.context = context
-        this.database = databaseReference
-        this.deleteItem = deleteItem
-    }
-
-    override fun getCount(): Int {
-        return items?.size ?: 0
-    }
-
-    override fun getItem(position: Int): ListView_Item {
-        return items!![position]
-    }
-
-    override fun getItemId(position: Int): Long {
-        return position.toLong()
-    }
-
-    // Adapter.getView() 해당위치 뷰 반환 함수
-    override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
-        val layoutInflater =
-            context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
-        val view: View = layoutInflater.inflate(R.layout.listview_item, parent, false)
-
-        val index: TextView = view.findViewById(R.id.listitem_index)
-        val count: TextView = view.findViewById(R.id.listitem_count)
-        val set: TextView = view.findViewById(R.id.listitem_set)
-        val type: TextView = view.findViewById(R.id.listitem_type)
-        val restTime: TextView = view.findViewById(R.id.listitem_resttime)
-
-        val item = items!![position]
-        index.text = (position + 1).toString() // 해당위치 +1 설정, 배열순으로 0부터 시작
-        type.text = item.type
-        count.text = item.count.toString()
-        set.text = item.set.toString()
-        restTime.text = item.restTime.toString()
-
-        view.findViewById<Button>(R.id.listitem_deleteButton).setOnClickListener {
-            deleteItem(item.id)
+        init {
+            this.items = items
+            this.context = context
+            this.database = databaseReference
+            this.deleteItem = deleteItem
         }
 
-        val alertDialogBuilder = AlertDialog.Builder(context)
-        val dialogView = layoutInflater.inflate(R.layout.dialog, null)
-
-        view.findViewById<Button>(R.id.listitem_editButton).setOnClickListener {
-            val dialogWeightInfoTypeText =
-                dialogView.findViewById<EditText>(R.id.dialogWeightInfoTypeText)
-            val dialogWeightInfoCountText =
-                dialogView.findViewById<EditText>(R.id.dialogWeightInfoCountText)
-            val dialogWeightInfoSetText =
-                dialogView.findViewById<EditText>(R.id.dialogWeightInfoSetText)
-            val dialogWeightInfoRestTimeText =
-                dialogView.findViewById<EditText>(R.id.dialogWeightInfoRestTimeText)
-
-            dialogWeightInfoTypeText.setText(type.text)
-            dialogWeightInfoCountText.setText(count.text)
-            dialogWeightInfoSetText.setText(set.text)
-            dialogWeightInfoRestTimeText.setText(restTime.text)
-
-
-            alertDialogBuilder.setView(dialogView)
-                .setPositiveButton("확인") { dialogInterface, i ->
-                    val type = dialogWeightInfoTypeText.text.toString()
-                    val set = dialogWeightInfoSetText.text.toString().toInt()
-                    val count = dialogWeightInfoCountText.text.toString().toInt()
-                    val restTime = dialogWeightInfoRestTimeText.text.toString().toInt()
-                    val listViewItem = ListView_Item(item.id, count, set, type, restTime)
-
-
-                    database
-                        .child(
-                            "weightInfo"
-                        ).child("bob")
-                        .child(getCurrentDateString())
-                        .child(item.id)
-                        .setValue(listViewItem)
-                        .addOnSuccessListener {
-                            Toast.makeText(context, "완료", Toast.LENGTH_SHORT).show()
-                        }
-
-
-                }
-                .setNegativeButton("취소") { dialogInterface, i ->
-                    Toast.makeText(context, "취소", Toast.LENGTH_SHORT).show()
-                }
-                .show()
+        override fun getCount(): Int {
+            return items?.size ?: 0
         }
 
-        return view
+        override fun getItem(position: Int): ListView_Item {
+            return items!![position]
+        }
+
+        override fun getItemId(position: Int): Long {
+            return position.toLong()
+        }
+
+        // Adapter.getView() 해당위치 뷰 반환 함수
+        override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
+            val layoutInflater =
+                context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
+            val view: View = layoutInflater.inflate(R.layout.listview_item, parent, false)
+
+            val index: TextView = view.findViewById(R.id.listitem_index)
+            val count: TextView = view.findViewById(R.id.listitem_count)
+            val set: TextView = view.findViewById(R.id.listitem_set)
+            val type: TextView = view.findViewById(R.id.listitem_type)
+            val restTime: TextView = view.findViewById(R.id.listitem_resttime)
+
+            val item = items!![position]
+            index.text = (position + 1).toString() // 해당위치 +1 설정, 배열순으로 0부터 시작
+            type.text = item.type
+            count.text = item.count.toString()
+            set.text = item.set.toString()
+            restTime.text = item.restTime.toString()
+
+            view.findViewById<Button>(R.id.listitem_deleteButton).setOnClickListener {
+                deleteItem(item.id)
+            }
+
+            view.findViewById<Button>(R.id.listitem_editButton).setOnClickListener {
+
+                val alertDialogBuilder = AlertDialog.Builder(this@MainActivity)
+                val dialogView = layoutInflater.inflate(R.layout.dialog, parent, false)
+                val dialogWeightInfoTypeText =
+                    dialogView.findViewById<EditText>(R.id.dialogWeightInfoTypeText)
+                val dialogWeightInfoCountText =
+                    dialogView.findViewById<EditText>(R.id.dialogWeightInfoCountText)
+                val dialogWeightInfoSetText =
+                    dialogView.findViewById<EditText>(R.id.dialogWeightInfoSetText)
+                val dialogWeightInfoRestTimeText =
+                    dialogView.findViewById<EditText>(R.id.dialogWeightInfoRestTimeText)
+
+                dialogWeightInfoTypeText.setText(type.text)
+                dialogWeightInfoCountText.setText(count.text)
+                dialogWeightInfoSetText.setText(set.text)
+                dialogWeightInfoRestTimeText.setText(restTime.text)
+
+
+                alertDialogBuilder.setView(dialogView)
+                    .setPositiveButton("확인") { dialogInterface, i ->
+                        val type = dialogWeightInfoTypeText.text.toString()
+                        val set = dialogWeightInfoSetText.text.toString().toInt()
+                        val count = dialogWeightInfoCountText.text.toString().toInt()
+                        val restTime = dialogWeightInfoRestTimeText.text.toString().toInt()
+                        val listViewItem = ListView_Item(item.id, count, set, type, restTime)
+
+
+                        database
+                            .child(
+                                "weightInfo"
+                            ).child("bob")
+                            .child(getCurrentDateString())
+                            .child(item.id)
+                            .setValue(listViewItem)
+                            .addOnSuccessListener {
+                                Toast.makeText(context, "완료", Toast.LENGTH_SHORT).show()
+                            }
+
+
+                    }
+                    .setNegativeButton("취소") { dialogInterface, i ->
+                        Toast.makeText(context, "취소", Toast.LENGTH_SHORT).show()
+                    }
+                    .show()
+            }
+
+            return view
+        }
     }
+
 }
+
 
 class ListView_Item(
     val id: String,
