@@ -75,7 +75,11 @@ class MainActivity : AppCompatActivity() {
                 items.add(ListView_Item(id, count, set, type, restTime))
             }
 
-            mAdapter = ListView_Adapter(this, items, database)
+            mAdapter = ListView_Adapter(this, items, database){ id: String ->
+                database.child(
+                    "weightInfo"
+                ).child("bob").child(getCurrentDateString()).child(id).removeValue()
+            }
             listView.setAdapter(mAdapter)
         }.addOnFailureListener {
             Log.d(TAG, "[OnFailureListener] Error getting data $it")
@@ -99,7 +103,12 @@ class MainActivity : AppCompatActivity() {
                     items.add(ListView_Item(id, count, set, type, restTime))
                 }
 
-                mAdapter = ListView_Adapter(applicationContext, items, database)
+                mAdapter = ListView_Adapter(applicationContext, items, database) { id: String ->
+                    database.child(
+                        "weightInfo"
+                    ).child("bob").child(getCurrentDateString()).child(id).removeValue()
+                }
+
                 listView.setAdapter(mAdapter)
             }
 
@@ -109,19 +118,21 @@ class MainActivity : AppCompatActivity() {
         })
     }
 
-
 }
 
-class ListView_Adapter(context: Context, items: List<ListView_Item>?, databaseReference: DatabaseReference) :
+
+class ListView_Adapter(context: Context, items: List<ListView_Item>?, databaseReference: DatabaseReference, deleteItem: (id :String) -> Unit) :
     BaseAdapter() {
     var items: List<ListView_Item>? = null
     var context: Context
     var database: DatabaseReference
+    var deleteItem: (id: String) -> Unit
 
     init {
         this.items = items
         this.context = context
         this.database = databaseReference
+        this.deleteItem = deleteItem
     }
 
     override fun getCount(): Int {
@@ -156,7 +167,7 @@ class ListView_Adapter(context: Context, items: List<ListView_Item>?, databaseRe
         restTime.text = item.restTime.toString()
 
         view.findViewById<Button>(R.id.listitem_deleteButton).setOnClickListener{
-            database.child("weightInfo").child("bob").child(getCurrentDateString()).child(item.id).removeValue()
+            deleteItem(item.id)
         }
 
         return view
