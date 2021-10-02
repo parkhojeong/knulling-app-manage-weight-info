@@ -34,12 +34,14 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         database = Firebase.database.reference
+
+        initAddWeightInfo()
+
         loadTodayWeightInfo()
-        addWeitghInfo()
         asyncTodayWeightInfo()
     }
 
-    fun addWeitghInfo() {
+    fun initAddWeightInfo() {
         val weightAddButton: Button = findViewById(R.id.weightAddButton)
         weightAddButton.setOnClickListener {
             val typeText = findViewById<EditText>(R.id.weightTypeAddText).text.toString()
