@@ -86,20 +86,20 @@ class MainActivity : AppCompatActivity() {
                 items.add(ListView_Item(id, count, set, type, restTime))
             }
 
-            mAdapter = ListView_Adapter(this, items, database,::delteItem,::editItem)
+            mAdapter = ListView_Adapter(this, items, database, ::delteItem, ::editItem)
             listView.setAdapter(mAdapter)
         }.addOnFailureListener {
             Log.d(TAG, "[OnFailureListener] Error getting data $it")
         }
     }
 
-    fun editItem(id: String, type: String, count: Int, set: Int, restTime: Int ){
+    fun editItem(id: String, type: String, count: Int, set: Int, restTime: Int) {
         val listViewItem = ListView_Item(id, count, set, type, restTime)
 
         database
             .child(
                 "weightInfo"
-            ).child("bob")
+            ).child("bob") // TODO: apply memeber id
             .child(getCurrentDateString())
             .child(id)
             .setValue(listViewItem)
@@ -108,7 +108,8 @@ class MainActivity : AppCompatActivity() {
             }
     }
 
-    fun delteItem(id: String){
+    fun delteItem(id: String) {
+        // TODO: apply memeber id ("bob")
         database.child(
             "weightInfo"
         ).child("bob").child(getCurrentDateString()).child(id).removeValue()
@@ -133,7 +134,13 @@ class MainActivity : AppCompatActivity() {
                         items.add(ListView_Item(id, count, set, type, restTime))
                     }
 
-                    mAdapter = ListView_Adapter(applicationContext, items, database, ::delteItem, ::editItem)
+                    mAdapter = ListView_Adapter(
+                        applicationContext,
+                        items,
+                        database,
+                        ::delteItem,
+                        ::editItem
+                    )
 
                     listView.setAdapter(mAdapter)
                 }
@@ -219,27 +226,14 @@ class MainActivity : AppCompatActivity() {
                 dialogWeightInfoSetText.setText(set.text)
                 dialogWeightInfoRestTimeText.setText(restTime.text)
 
-
                 alertDialogBuilder.setView(dialogView)
                     .setPositiveButton("확인") { dialogInterface, i ->
                         val type = dialogWeightInfoTypeText.text.toString()
                         val set = dialogWeightInfoSetText.text.toString().toInt()
                         val count = dialogWeightInfoCountText.text.toString().toInt()
                         val restTime = dialogWeightInfoRestTimeText.text.toString().toInt()
-                        val listViewItem = ListView_Item(item.id, count, set, type, restTime)
 
                         editItem(item.id, type, count, set, restTime)
-//                        database
-//                            .child(
-//                                "weightInfo"
-//                            ).child("bob")
-//                            .child(getCurrentDateString())
-//                            .child(item.id)
-//                            .setValue(listViewItem)
-//                            .addOnSuccessListener {
-//                                Toast.makeText(context, "완료", Toast.LENGTH_SHORT).show()
-//                            }
-
 
                     }
                     .setNegativeButton("취소") { dialogInterface, i ->
