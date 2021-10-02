@@ -25,10 +25,10 @@ import android.app.AlertDialog
 
 
 class MainActivity : AppCompatActivity() {
-    val TAG = "MainActivity"
-    lateinit var database: DatabaseReference
-    lateinit var mAdapter: ListView_Adapter
-    var selectedDate = getCurrentDateString()
+    private val TAG = "MainActivity"
+    private lateinit var database: DatabaseReference
+    private lateinit var mAdapter: ListView_Adapter
+    private var selectedDate = getCurrentDateString()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
