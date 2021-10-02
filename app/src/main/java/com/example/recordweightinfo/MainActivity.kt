@@ -86,11 +86,24 @@ class MainActivity : AppCompatActivity() {
                 items.add(ListView_Item(id, count, set, type, restTime))
             }
 
-            mAdapter = ListView_Adapter(this, items, database) { id: String ->
+            mAdapter = ListView_Adapter(this, items, database,{ id: String ->
                 database.child(
                     "weightInfo"
                 ).child("bob").child(getCurrentDateString()).child(id).removeValue()
-            }
+            },{ id: String, type: String, count: Int, set: Int, restTime: Int ->
+                val listViewItem = ListView_Item(id, count, set, type, restTime)
+
+                database
+                    .child(
+                        "weightInfo"
+                    ).child("bob")
+                    .child(getCurrentDateString())
+                    .child(id)
+                    .setValue(listViewItem)
+                    .addOnSuccessListener {
+                        Toast.makeText(this@MainActivity, "완료", Toast.LENGTH_SHORT).show()
+                    }
+            })
             listView.setAdapter(mAdapter)
         }.addOnFailureListener {
             Log.d(TAG, "[OnFailureListener] Error getting data $it")
@@ -116,11 +129,24 @@ class MainActivity : AppCompatActivity() {
                         items.add(ListView_Item(id, count, set, type, restTime))
                     }
 
-                    mAdapter = ListView_Adapter(applicationContext, items, database) { id: String ->
+                    mAdapter = ListView_Adapter(applicationContext, items, database, { id: String ->
                         database.child(
                             "weightInfo"
                         ).child("bob").child(getCurrentDateString()).child(id).removeValue()
-                    }
+                    }, { id: String, type: String, count: Int, set: Int, restTime: Int ->
+                        val listViewItem = ListView_Item(id, count, set, type, restTime)
+
+                        database
+                            .child(
+                                "weightInfo"
+                            ).child("bob")
+                            .child(getCurrentDateString())
+                            .child(id)
+                            .setValue(listViewItem)
+                            .addOnSuccessListener {
+                                Toast.makeText(this@MainActivity, "완료", Toast.LENGTH_SHORT).show()
+                            }
+                    })
 
                     listView.setAdapter(mAdapter)
                 }
@@ -135,19 +161,22 @@ class MainActivity : AppCompatActivity() {
         context: Context,
         items: List<ListView_Item>?,
         databaseReference: DatabaseReference,
-        deleteItem: (id: String) -> Unit
+        deleteItem: (id: String) -> Unit,
+        editItem: (id: String, type: String, count: Int, set: Int, restTime: Int) -> Unit
     ) :
         BaseAdapter() {
         var items: List<ListView_Item>? = null
         var context: Context
         var database: DatabaseReference
         var deleteItem: (id: String) -> Unit
+        var editItem: (id: String, type: String, count: Int, set: Int, restTime: Int) -> Unit
 
         init {
             this.items = items
             this.context = context
             this.database = databaseReference
             this.deleteItem = deleteItem
+            this.editItem = editItem
         }
 
         override fun getCount(): Int {
