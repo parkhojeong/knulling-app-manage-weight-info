@@ -37,7 +37,7 @@ class MainActivity : AppCompatActivity() {
 
         initAddWeightInfo()
 
-        loadTodayWeightInfo()
+        loadWeightInfo(getCurrentDateString())
         asyncTodayWeightInfo()
 
 
@@ -76,12 +76,14 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    fun loadTodayWeightInfo() {
+    fun loadWeightInfo(date: String) {
+        // TODO: date 포맷(YYYY-MM-DD) 검증
+
         database.child("weightInfo").get().addOnSuccessListener {
             val listView: ListView = findViewById(R.id.listview_list)
             val items = mutableListOf<ListView_Item>()
 
-            it.child("bob").child(getCurrentDateString()).children.forEach { data ->
+            it.child("bob").child(date).children.forEach { data ->
                 val id: String = data.key as String
                 val set: Number = data.child("set").value?.toString()?.toInt() ?: 0
                 val count: Number = data.child("count").value?.toString()?.toInt() ?: 0
