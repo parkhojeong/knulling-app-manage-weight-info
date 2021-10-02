@@ -39,7 +39,7 @@ class MainActivity : AppCompatActivity() {
         initAddWeightInfo()
 
         loadWeightInfo()
-        asyncTodayWeightInfo()
+        asyncSelectedDateWeightInfo()
         findViewById<TextView>(R.id.selectedDateTextView).text = selectedDate
 
         val calandarView = findViewById<CalendarView>(R.id.calendarView)
@@ -176,7 +176,7 @@ class MainActivity : AppCompatActivity() {
         ).child("bob").child(selectedDate).child(id).removeValue()
     }
 
-    fun asyncTodayWeightInfo() {
+    fun asyncSelectedDateWeightInfo() {
         database.child("weightInfo").child("bob")
             .addValueEventListener(object : ValueEventListener {
                 override fun onDataChange(dataSnapshot: DataSnapshot) {
