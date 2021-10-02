@@ -28,6 +28,7 @@ class MainActivity : AppCompatActivity() {
     val TAG = "MainActivity"
     lateinit var database: DatabaseReference
     lateinit var mAdapter: ListView_Adapter
+    var selectedDate = getCurrentDateString()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -37,13 +38,25 @@ class MainActivity : AppCompatActivity() {
 
         initAddWeightInfo()
 
-        loadWeightInfo(getCurrentDateString())
+        loadWeightInfo()
         asyncTodayWeightInfo()
+        findViewById<TextView>(R.id.selectedDateTextView).text = selectedDate
 
+        val calandarView = findViewById<CalendarView>(R.id.calendarView)
+        calandarView.date = getCurrentDateFromString(selectedDate).time
 
-        findViewById<Button>(R.id.reuseRecentWeightInfoButton).setOnClickListener{
+        calandarView.setOnDateChangeListener { view, y, m, d ->
+            val date = GregorianCalendar(y, m, d).time
+            selectedDate = SimpleDateFormat("y-MM-d").format(date).toString()
+            calandarView.date = getCurrentDateFromString(selectedDate).time
+            findViewById<TextView>(R.id.selectedDateTextView).text = selectedDate
+            loadWeightInfo()
+        }
+
+        findViewById<Button>(R.id.reuseRecentWeightInfoButton).setOnClickListener {
             reuseRecentWeightInfo()
         }
+
     }
 
     fun initAddWeightInfo() {
@@ -60,7 +73,7 @@ class MainActivity : AppCompatActivity() {
             }
 
             val currentDateRef =
-                database.child("weightInfo").child("bob").child(getCurrentDateString())
+                database.child("weightInfo").child("bob").child(selectedDate)
 
             val count = countText.toInt()
             val set = setText.toInt()
@@ -76,14 +89,14 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    fun loadWeightInfo(date: String) {
+    fun loadWeightInfo() {
         // TODO: date 포맷(YYYY-MM-DD) 검증
 
         database.child("weightInfo").get().addOnSuccessListener {
             val listView: ListView = findViewById(R.id.listview_list)
             val items = mutableListOf<ListView_Item>()
 
-            it.child("bob").child(date).children.forEach { data ->
+            it.child("bob").child(selectedDate).children.forEach { data ->
                 val id: String = data.key as String
                 val set: Number = data.child("set").value?.toString()?.toInt() ?: 0
                 val count: Number = data.child("count").value?.toString()?.toInt() ?: 0
@@ -100,7 +113,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    fun reuseRecentWeightInfo(){
+    fun reuseRecentWeightInfo() {
         database.child("weightInfo").get().addOnSuccessListener {
             val items = mutableListOf<ListView_Item>()
 
@@ -123,7 +136,7 @@ class MainActivity : AppCompatActivity() {
             }
 
             val todayRef =
-                database.child("weightInfo").child("bob").child(getCurrentDateString())
+                database.child("weightInfo").child("bob").child(selectedDate)
 
             items.forEach {
                 todayRef.push().setValue(
@@ -148,7 +161,7 @@ class MainActivity : AppCompatActivity() {
             .child(
                 "weightInfo"
             ).child("bob") // TODO: apply memeber id
-            .child(getCurrentDateString())
+            .child(selectedDate)
             .child(id)
             .setValue(listViewItem)
             .addOnSuccessListener {
@@ -160,7 +173,7 @@ class MainActivity : AppCompatActivity() {
         // TODO: apply memeber id ("bob")
         database.child(
             "weightInfo"
-        ).child("bob").child(getCurrentDateString()).child(id).removeValue()
+        ).child("bob").child(selectedDate).child(id).removeValue()
     }
 
     fun asyncTodayWeightInfo() {
@@ -170,7 +183,7 @@ class MainActivity : AppCompatActivity() {
                     val listView: ListView = findViewById(R.id.listview_list)
                     val items = mutableListOf<ListView_Item>()
 
-                    dataSnapshot.child(getCurrentDateString()).children.forEach { data ->
+                    dataSnapshot.child(selectedDate).children.forEach { data ->
                         val id: String = data.key as String
                         val set: Number = data.child("set").value?.toString()?.toInt() ?: 0
                         val count: Number = data.child("count").value?.toString()?.toInt() ?: 0
@@ -307,4 +320,8 @@ class ListView_Item(
 
 fun getCurrentDateString(): String {
     return SimpleDateFormat("y-MM-d").format(Date()).toString()
+}
+
+fun getCurrentDateFromString(string: String): Date {
+    return SimpleDateFormat("y-MM-d").parse(string)
 }
