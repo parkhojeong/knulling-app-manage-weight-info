@@ -75,7 +75,6 @@ class MainActivity : AppCompatActivity() {
         val listView: ListView = findViewById(R.id.listview_list)
 
         database.child("weightInfo").get().addOnSuccessListener {
-            Log.d(TAG, "[OnSuccessListener]")
             val items = mutableListOf<ListView_Item>()
 
             it.child("bob").child(getCurrentDateString()).children.forEach { data ->
@@ -121,7 +120,6 @@ class MainActivity : AppCompatActivity() {
         database.child("weightInfo").child("bob")
             .addValueEventListener(object : ValueEventListener {
                 override fun onDataChange(dataSnapshot: DataSnapshot) {
-                    Log.d(TAG, "onDataChange")
                     val listView: ListView = findViewById(R.id.listview_list)
                     val items = mutableListOf<ListView_Item>()
 
