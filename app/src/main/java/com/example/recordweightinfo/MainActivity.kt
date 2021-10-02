@@ -86,28 +86,32 @@ class MainActivity : AppCompatActivity() {
                 items.add(ListView_Item(id, count, set, type, restTime))
             }
 
-            mAdapter = ListView_Adapter(this, items, database,{ id: String ->
-                database.child(
-                    "weightInfo"
-                ).child("bob").child(getCurrentDateString()).child(id).removeValue()
-            },{ id: String, type: String, count: Int, set: Int, restTime: Int ->
-                val listViewItem = ListView_Item(id, count, set, type, restTime)
-
-                database
-                    .child(
-                        "weightInfo"
-                    ).child("bob")
-                    .child(getCurrentDateString())
-                    .child(id)
-                    .setValue(listViewItem)
-                    .addOnSuccessListener {
-                        Toast.makeText(this@MainActivity, "완료", Toast.LENGTH_SHORT).show()
-                    }
-            })
+            mAdapter = ListView_Adapter(this, items, database,::delteItem,::editItem)
             listView.setAdapter(mAdapter)
         }.addOnFailureListener {
             Log.d(TAG, "[OnFailureListener] Error getting data $it")
         }
+    }
+
+    fun editItem(id: String, type: String, count: Int, set: Int, restTime: Int ){
+        val listViewItem = ListView_Item(id, count, set, type, restTime)
+
+        database
+            .child(
+                "weightInfo"
+            ).child("bob")
+            .child(getCurrentDateString())
+            .child(id)
+            .setValue(listViewItem)
+            .addOnSuccessListener {
+                Toast.makeText(this@MainActivity, "완료", Toast.LENGTH_SHORT).show()
+            }
+    }
+
+    fun delteItem(id: String){
+        database.child(
+            "weightInfo"
+        ).child("bob").child(getCurrentDateString()).child(id).removeValue()
     }
 
     fun asyncTodayWeightInfo() {
@@ -129,24 +133,7 @@ class MainActivity : AppCompatActivity() {
                         items.add(ListView_Item(id, count, set, type, restTime))
                     }
 
-                    mAdapter = ListView_Adapter(applicationContext, items, database, { id: String ->
-                        database.child(
-                            "weightInfo"
-                        ).child("bob").child(getCurrentDateString()).child(id).removeValue()
-                    }, { id: String, type: String, count: Int, set: Int, restTime: Int ->
-                        val listViewItem = ListView_Item(id, count, set, type, restTime)
-
-                        database
-                            .child(
-                                "weightInfo"
-                            ).child("bob")
-                            .child(getCurrentDateString())
-                            .child(id)
-                            .setValue(listViewItem)
-                            .addOnSuccessListener {
-                                Toast.makeText(this@MainActivity, "완료", Toast.LENGTH_SHORT).show()
-                            }
-                    })
+                    mAdapter = ListView_Adapter(applicationContext, items, database, ::delteItem, ::editItem)
 
                     listView.setAdapter(mAdapter)
                 }
@@ -241,17 +228,17 @@ class MainActivity : AppCompatActivity() {
                         val restTime = dialogWeightInfoRestTimeText.text.toString().toInt()
                         val listViewItem = ListView_Item(item.id, count, set, type, restTime)
 
-
-                        database
-                            .child(
-                                "weightInfo"
-                            ).child("bob")
-                            .child(getCurrentDateString())
-                            .child(item.id)
-                            .setValue(listViewItem)
-                            .addOnSuccessListener {
-                                Toast.makeText(context, "완료", Toast.LENGTH_SHORT).show()
-                            }
+                        editItem(item.id, type, count, set, restTime)
+//                        database
+//                            .child(
+//                                "weightInfo"
+//                            ).child("bob")
+//                            .child(getCurrentDateString())
+//                            .child(item.id)
+//                            .setValue(listViewItem)
+//                            .addOnSuccessListener {
+//                                Toast.makeText(context, "완료", Toast.LENGTH_SHORT).show()
+//                            }
 
 
                     }
