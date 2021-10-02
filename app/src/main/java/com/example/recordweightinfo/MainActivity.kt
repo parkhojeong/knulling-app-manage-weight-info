@@ -39,6 +39,11 @@ class MainActivity : AppCompatActivity() {
 
         loadTodayWeightInfo()
         asyncTodayWeightInfo()
+
+
+        findViewById<Button>(R.id.reuseRecentWeightInfoButton).setOnClickListener{
+            reuseRecentWeightInfo()
+        }
     }
 
     fun initAddWeightInfo() {
@@ -72,9 +77,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun loadTodayWeightInfo() {
-        val listView: ListView = findViewById(R.id.listview_list)
-
         database.child("weightInfo").get().addOnSuccessListener {
+            val listView: ListView = findViewById(R.id.listview_list)
             val items = mutableListOf<ListView_Item>()
 
             it.child("bob").child(getCurrentDateString()).children.forEach { data ->
@@ -89,6 +93,47 @@ class MainActivity : AppCompatActivity() {
 
             mAdapter = ListView_Adapter(this, items, database, ::delteItem, ::editItem)
             listView.setAdapter(mAdapter)
+        }.addOnFailureListener {
+            Log.d(TAG, "[OnFailureListener] Error getting data $it")
+        }
+    }
+
+    fun reuseRecentWeightInfo(){
+        database.child("weightInfo").get().addOnSuccessListener {
+            val items = mutableListOf<ListView_Item>()
+
+            run lit@{
+                it.child("bob").children.reversed().forEach { dataData ->
+
+                    dataData.children.forEach { data ->
+                        val id: String = data.key as String
+                        val set: Number = data.child("set").value?.toString()?.toInt() ?: 0
+                        val count: Number = data.child("count").value?.toString()?.toInt() ?: 0
+                        val type: String = data.child("type").value?.toString() ?: ""
+                        val restTime: Number =
+                            data.child("restTime").value?.toString()?.toInt() ?: 0
+
+                        items.add(ListView_Item(id, count, set, type, restTime))
+                    }
+
+                    return@lit
+                }
+            }
+
+            val todayRef =
+                database.child("weightInfo").child("bob").child(getCurrentDateString())
+
+            items.forEach {
+                todayRef.push().setValue(
+                    mapOf(
+                        "count" to it.count,
+                        "set" to it.set,
+                        "restTime" to it.restTime,
+                        "type" to it.type
+                    )
+                )
+            }
+
         }.addOnFailureListener {
             Log.d(TAG, "[OnFailureListener] Error getting data $it")
         }
